@@ -137,6 +137,8 @@ h4 {
 }
 
 button {
+  font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
+    Roboto, sans-serif;
   background-color: @btn-bg;
   color: @text-primary;
   border: 1px solid @btn-border;
@@ -350,10 +352,13 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 2rem 0 1rem;
+  padding: 0 0 1rem;
   box-shadow: 0 0 10px @bg-app;
+  .text-button {
+    margin-top: 2rem;
+  }
   h2 {
-    margin: 0;
+    margin: 2rem 0 0;
   }
 }
 
@@ -393,6 +398,9 @@ button {
 }
 
 .guide-exercise {
+  &:last-of-type {
+    margin-bottom: 2rem;
+  }
   .guide-image-wrapper {
     height: 140px;
     width: 100%;
@@ -413,7 +421,7 @@ button {
   }
 
   h3 {
-    margin: 0.5em 0;
+    margin: 1em 0 0.5em 0;
   }
 
   ul {
@@ -421,6 +429,7 @@ button {
     margin: 0;
     opacity: 0.85;
     list-style-type: '- ';
+    line-height: 1.3em;
   }
 
   /*li {

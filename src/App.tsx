@@ -375,7 +375,6 @@ export default function App() {
             onClick={() => setPhase('idle')}
             style={{
               marginRight: 16,
-              fontSize: '.85rem',
             }}
           >
             <span
@@ -392,7 +391,6 @@ export default function App() {
               console.log('Guide clicked');
               setShowGuide(true);
             }}
-            style={{ fontSize: '.85rem' }}
           >
             <span
               className='material-symbols-rounded'
