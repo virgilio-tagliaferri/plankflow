@@ -1,8 +1,8 @@
-@bg-app: #023; // slate-900
+@bg-app: #002637; // slate-900
 @text-primary: #e5e7eb; // gray-200
 
-@btn-bg: #045; // slate-800
-@btn-border: #267; // slate-700
+@btn-bg: #00495a; // slate-800
+@btn-border: #226a7b; // slate-700
 @btn-hover: #267;
 
 @primary-green: #16a34a; // green-600
@@ -18,7 +18,7 @@
 @danger-text-alt: #fee2e2;
 @danger-focus: #660000;
 
-@accent-warning: #fc6;
+@accent-warning: #dd4;
 
 :root {
   color-scheme: dark;
@@ -31,10 +31,29 @@
 
 body {
   margin: 0;
-  font-family: 'Outfit', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, sans-serif;
+  font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
+    Roboto, sans-serif;
   background-color: @bg-app;
   color: @text-primary;
+}
+
+p {
+  line-height: 1.3em;
+}
+
+.logo {
+  margin: 0 0 0.25em;
+  font-size: 1.75em;
+  background-color: @primary-green;
+  background: linear-gradient(
+    45deg,
+    @btn-hover 30%,
+    @primary-gradient-end 100%
+  );
+  border-radius: 50%;
+  padding: 1rem;
+  /*-webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;*/
 }
 
 .workout-container {
@@ -57,18 +76,35 @@ body {
     }
   }
 }
+.exercise-image-wrapper {
+  height: 180px;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+}
+.exercise-image {
+  width: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+  transform: scale(1.1);
+
+  &.mirrored {
+    transform: scaleX(-1) scale(1.1);
+  }
+}
 
 h1,
 h2,
 h3,
 h4 {
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .phase-header {
   position: relative;
-  min-height: 72px;
-  margin-bottom: 8px;
+  min-height: 85px;
+  margin-top: 1rem;
   width: 90vw;
 }
 
@@ -81,14 +117,17 @@ h4 {
   opacity: 0;
   transform: translateY(4px);
   pointer-events: none;
-  /*transition: all 0.3s;*/
+  transition: all 0.5s;
+  h3 {
+    opacity: 0.75;
+  }
   &.active {
     opacity: 1;
     transform: translateY(0);
   }
-  .workout-active & h4 {
+  /*.workout-active & h2 {
     animation: blink 1s ease-in-out infinite;
-  }
+  }*/
 }
 
 .controlPanel {
@@ -104,9 +143,7 @@ button {
   padding: 10px 16px;
   border-radius: 6px;
   cursor: pointer;
-  font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', Roboto, sans-serif;
-  font-size: 1.1rem;
+  font-size: 1rem;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -153,8 +190,7 @@ button {
   background-color: transparent;
   border-color: @danger-bg;
   color: @danger-text;
-  margin-top: 24px;
-  z-index: 20; // sits above backdrop
+  z-index: 20; // sits above cancellation backdrop
   &:hover {
     background-color: @danger-bg;
     color: @danger-text-alt;
@@ -175,6 +211,42 @@ button {
   z-index: 10;
 }
 
+.pause-ring {
+  position: relative;
+  width: 120px;
+  height: 120px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+//svg
+.progress-ring {
+  position: absolute;
+  inset: 0;
+  top: 0;
+  left: 0;
+  transform-origin: 50% 50%;
+  transform: rotate(-90deg);
+  circle {
+    stroke: @primary-green;
+    transition: stroke-dashoffset 1s linear;
+    stroke-linecap: round;
+  }
+  &.no-transition circle {
+    transition: none;
+  }
+  &.is-rest circle {
+    stroke: white;
+  }
+  &.is-paused circle {
+    stroke: @accent-warning;
+    animation: pulse-pause 1s ease-in-out infinite;
+  }
+  &.is-rest {
+    transform: scale(-1, 1) rotate(-90deg);
+  }
+}
+
 .pause-button {
   height: 100px;
   width: 100px;
@@ -183,7 +255,10 @@ button {
   align-items: center;
   justify-content: center;
   transition: color 1s;
-
+  z-index: 1;
+  position: relative;
+  transform: none;
+  transform: none;
   span {
     font-size: 50px;
   }
@@ -197,19 +272,160 @@ button {
   }
 }
 
+.text-button {
+  background: none;
+  padding: 0;
+  border: none;
+}
+
 .timer {
   font-size: 48px;
   margin: var(--space) 0;
   transition: color 1s;
-
+  line-height: 1em;
+  &.ending {
+    animation: pulse-expire 1s ease-in infinite;
+  }
   &.paused {
     animation: pulse-pause 1s ease-in-out infinite;
     color: @accent-warning;
   }
+}
 
-  &.ending {
-    animation: pulse-expire 500ms ease-in-out infinite;
+.progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #475569; // slate-600
+  opacity: 0.5;
+  transition: all 0.5s;
+}
+
+.dot.done {
+  opacity: 0.3;
+}
+
+.dot.active {
+  background: #e5e7eb; // gray-200
+  opacity: 1;
+  transform: scale(1.4);
+}
+
+.guide-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.85); // slate-900 w/ opacity
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.guide-modal {
+  background: @bg-app; // near-slate-950
+  color: #e5e7eb;
+  width: 100%;
+  max-width: 420px;
+  max-height: 100vh;
+  padding: 0 2rem 2rem;
+  overflow-y: auto;
+  animation: fadeUp 200ms ease-out;
+  font-size: 0.95rem;
+  display: flex;
+  flex-direction: column;
+}
+
+.guide-header {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: @bg-app;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 2rem 0 1rem;
+  box-shadow: 0 0 10px @bg-app;
+  h2 {
+    margin: 0;
   }
+}
+
+.guide-intro {
+  opacity: 0.75;
+  margin: 0;
+  text-align: left;
+}
+
+.guide-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  text-align: left;
+  position: relative;
+  /*&:before {
+    content: '';
+    height: 3rem;
+    background: linear-gradient(@bg-app 0%, rgba(@bg-app, 0) 100%);
+    width: 100%;
+    position: absolute;
+    top: 0;
+    z-index: 1;
+  }*/
+  &:after {
+    content: '';
+    height: 30px;
+    background: linear-gradient(
+      180deg,
+      rgba(@bg-app, 0) 0%,
+      rgba(@bg-app, 0.75) 100%
+    );
+    width: 100%;
+    position: fixed;
+    bottom: 0;
+  }
+}
+
+.guide-exercise {
+  .guide-image-wrapper {
+    height: 140px;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    img {
+      width: 100%;
+      object-fit: cover;
+      object-position: 50% 40%;
+      transform: scale(1.1);
+    }
+  }
+  img {
+    width: 100%;
+    border-radius: 8px;
+    margin-bottom: 8px;
+  }
+
+  h3 {
+    margin: 0.5em 0;
+  }
+
+  ul {
+    padding-left: 10px;
+    margin: 0;
+    opacity: 0.85;
+    list-style-type: '- ';
+  }
+
+  /*li {
+    margin-bottom: 6px;
+  }*/
 }
 
 @keyframes shine {
@@ -250,12 +466,11 @@ button {
 @keyframes pulse-expire {
   0% {
     transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
+    opacity: 1;
   }
   100% {
-    transform: scale(1);
+    transform: scale(1.5);
+    opacity: 0;
   }
 }
 @keyframes blink {
@@ -272,21 +487,13 @@ button {
     opacity: 0.9;
   }
 }
-
-.exercise-image-wrapper {
-  height: 180px;
-  width: 100%;
-  overflow: hidden;
-  display: flex;
-  justify-content: center;
-}
-
-.exercise-image {
-  width: 100%;
-  object-fit: cover;
-  object-position: 50% 40%;
-
-  &.mirrored {
-    transform: scaleX(-1);
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

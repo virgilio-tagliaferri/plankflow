@@ -16,7 +16,7 @@ type WorkoutConfig = {
   shortBreak: number;
   longBreak: number;
 };
-type Level = 0 | 1 | 2;
+type Level = 0 | 1 | 2 | 3 | 4;
 
 const LEVEL_LABELS = [
   'Beginner',
@@ -40,7 +40,7 @@ function configFromLevel(level: Level) {
 }
 
 export default function App() {
-  const TIME_SCALE = DEBUG ? 0.2 : 1;
+  const TIME_SCALE = DEBUG ? 1 : 1;
 
   // ---------- STATE ----------
   const [phase, setPhase] = useState<Phase>('idle');
@@ -50,6 +50,7 @@ export default function App() {
   const [confirmAbort, setConfirmAbort] = useState(false);
   const [level, setLevel] = useState<Level>(2); // 2 = Intermediate default
   const [config, setConfig] = useState<WorkoutConfig>(() => configFromLevel(1));
+  const [showGuide, setShowGuide] = useState(false);
   // ---------- DERIVED ----------
   const currentExercise = WORKOUT[currentIndex];
 
@@ -60,11 +61,39 @@ export default function App() {
       ? WORKOUT[currentIndex + 1]
       : currentExercise;
 
+  const isPhaseTransition =
+    timeLeft ===
+    Math.ceil(
+      (phase === 'exercise'
+        ? config.exerciseDuration
+        : phase === 'break'
+        ? getBreakDuration(currentIndex)
+        : 10) * TIME_SCALE
+    );
+
   const isPastHalfway =
     phase === 'exercise' &&
     timeLeft <= Math.ceil((config.exerciseDuration * TIME_SCALE) / 2);
 
   const isEnding = phase === 'exercise' && timeLeft > 0 && timeLeft <= 5;
+  const radius = 60;
+  const stroke = 4;
+  const normalizedRadius = radius - stroke * 2;
+  const circumference = normalizedRadius * 2 * Math.PI;
+
+  const totalExerciseTime = Math.ceil(config.exerciseDuration * TIME_SCALE);
+
+  const totalTime =
+    phase === 'exercise'
+      ? totalExerciseTime
+      : phase === 'break'
+      ? Math.ceil(getBreakDuration(currentIndex) * TIME_SCALE)
+      : Math.ceil(10 * TIME_SCALE);
+
+  const progress =
+    phase === 'countdown' || phase === 'exercise' || phase === 'break'
+      ? Math.min(1, Math.max(0, 1 - timeLeft / totalTime))
+      : 1;
 
   useEffect(() => {
     setConfig(configFromLevel(level));
@@ -244,12 +273,15 @@ export default function App() {
       {DEBUG && (
         <div
           style={{
-            opacity: 0.2,
+            opacity: 0.1,
             fontSize: '1rem',
+            textTransform: 'uppercase',
             position: 'absolute',
-            top: '0.5rem',
-            outline: '1px dashed',
-            padding: '0.5rem',
+            bottom: 0,
+            right: 0,
+            padding: '0.25rem',
+            background: 'white',
+            color: 'black',
           }}
         >
           Debug mode (×{1 / TIME_SCALE})
@@ -259,7 +291,9 @@ export default function App() {
       {phase === 'idle' && (
         <>
           <h1 style={{ marginTop: '0', marginBottom: '0' }}>
-            Guided Plank Workout
+            <span className='material-symbols-rounded logo'>hourglass</span>
+            <br />
+            PlankFlow
           </h1>
 
           <p
@@ -281,11 +315,13 @@ export default function App() {
       {/* ---------- CONFIG ---------- */}
       {phase === 'config' && (
         <div style={{ maxWidth: 400, width: '90%' }}>
-          <h2 style={{ marginTop: 0 }}>Workout Settings</h2>
+          <h2 style={{ margin: 0 }}>Workout Settings</h2>
 
-          <p style={{}}>
-            Choose your difficulty level. Each of the ten exercises is timed for
-            you, with guided transitions and rest in between.
+          <p style={{ letterSpacing: '-0.025em' }}>
+            Choose a difficulty level and get ready to move.
+            <br />
+            You’ll rest briefly between exercises, with a longer break halfway
+            through the workout.
           </p>
 
           <div style={{ marginBottom: 32, marginTop: 32 }}>
@@ -294,7 +330,7 @@ export default function App() {
             </label>
 
             <input
-              style={{ width: '100%', maxWidth: 320 }}
+              style={{ width: '66%', maxWidth: 320 }}
               type='range'
               min={0}
               max={4}
@@ -312,28 +348,59 @@ export default function App() {
                 marginTop: 4,
                 padding: '0 8px',
               }}
-            >
-              {/*<span>Beginner</span>
-              <span>Intermediate</span>
-              <span>Advanced</span>*/}
-            </div>
+            ></div>
             <p style={{ margin: '0.5rem' }}>
               Plank hold: <strong>{config.exerciseDuration}s</strong>
             </p>
             <p style={{ margin: '0.5rem' }}>
-              Short break: <strong>{config.shortBreak}s</strong>
+              Short rest: <strong>{config.shortBreak}s</strong>
             </p>
             <p style={{ margin: '0.5rem' }}>
-              Long break: <strong>{config.longBreak}s</strong>
+              Long rest: <strong>{config.longBreak}s</strong>
             </p>
+          </div>
+          <div></div>
+          <div>
+            <button
+              className='start-button'
+              onClick={beginWorkout}
+              style={{ marginTop: 0, marginBottom: 16 }}
+            >
+              Begin workout
+            </button>
           </div>
 
           <button
-            className='start-button'
-            onClick={beginWorkout}
-            style={{ marginTop: 20 }}
+            type='button'
+            onClick={() => setPhase('idle')}
+            style={{
+              marginRight: 16,
+              fontSize: '.85rem',
+            }}
           >
-            Begin workout
+            <span
+              className='material-symbols-rounded'
+              style={{ marginRight: 6, fontSize: '1.5em' }}
+            >
+              arrow_back
+            </span>
+            Back
+          </button>
+          <button
+            type='button'
+            onClick={() => {
+              console.log('Guide clicked');
+              setShowGuide(true);
+            }}
+            style={{ fontSize: '.85rem' }}
+          >
+            <span
+              className='material-symbols-rounded'
+              style={{ marginRight: 6, fontSize: '1.5em' }}
+            >
+              book_5
+            </span>
+            Guide
           </button>
         </div>
       )}
@@ -351,9 +418,6 @@ export default function App() {
             maxWidth: 400,
           }}
         >
-          <h4 style={{ marginTop: '0' }}>
-            {currentIndex + 1} / {WORKOUT.length}
-          </h4>
           <div className='phase-header'>
             {/* COUNTDOWN */}
             <div
@@ -361,8 +425,8 @@ export default function App() {
                 phase === 'countdown' ? 'active' : ''
               }`}
             >
-              <h4 style={{ margin: '0' }}>Get into position</h4>
-              <h2 style={{ marginTop: '0' }}>{currentExercise.name}</h2>
+              <h1 style={{ margin: '0' }}>Get into position</h1>
+              <h3 style={{ marginTop: '0' }}>{currentExercise.name}</h3>
             </div>
             {/* EXERCISE */}
             <div
@@ -370,18 +434,33 @@ export default function App() {
                 phase === 'exercise' ? 'active' : ''
               }`}
             >
-              <h4 style={{ margin: '0' }}>Hold steady</h4>
-              <h2 style={{ marginTop: '0' }}>{currentExercise.name}</h2>
+              <h1 style={{ margin: '0' }}>Hold steady</h1>
+              <h3 style={{ marginTop: '0' }}>{currentExercise.name}</h3>
             </div>
             {/* BREAK */}
             <div
               className={`phase-content ${phase === 'break' ? 'active' : ''}`}
             >
-              <h4 style={{ margin: '0' }}>Up next:</h4>
-              <h2 style={{ marginTop: '0' }}>
-                {WORKOUT[currentIndex + 1]?.name}
-              </h2>
+              <h1 style={{ margin: '0' }}>Rest</h1>
+              <h3 style={{ marginTop: '0' }}>
+                Up next: {WORKOUT[currentIndex + 1]?.name}
+              </h3>
             </div>
+          </div>
+
+          <div className='progress-dots' aria-hidden='true'>
+            {WORKOUT.map((_, i) => (
+              <span
+                key={i}
+                className={
+                  i === currentIndex
+                    ? 'dot active'
+                    : i < currentIndex
+                    ? 'dot done'
+                    : 'dot'
+                }
+              />
+            ))}
           </div>
 
           {displayExercise?.image && (
@@ -410,7 +489,7 @@ export default function App() {
             <button
               onClick={previous}
               disabled={currentIndex === 0}
-              style={{ marginRight: 12 }}
+              style={{ marginRight: 6 }}
             >
               <span
                 className='material-symbols-rounded'
@@ -421,20 +500,48 @@ export default function App() {
               Back
             </button>
 
-            <button
-              onClick={togglePause}
-              className={`pause-button ${isPaused ? 'is-resume' : ''}`}
-              aria-label={isPaused ? 'Resume workout' : 'Pause workout'}
-            >
-              <span className='material-symbols-rounded' aria-hidden='true'>
-                {isPaused ? 'play_arrow' : 'pause'}
-              </span>
-            </button>
+            <div className='pause-ring'>
+              {(phase === 'countdown' ||
+                phase === 'exercise' ||
+                phase === 'break') && (
+                <svg
+                  width={radius * 2}
+                  height={radius * 2}
+                  viewBox={`0 0 ${radius * 2} ${radius * 2}`}
+                  className={`progress-ring ${
+                    phase === 'break' || phase === 'countdown' ? 'is-rest' : ''
+                  } ${isPaused ? 'is-paused' : ''} ${
+                    isPhaseTransition ? 'no-transition' : ''
+                  }
+      `}
+                >
+                  <circle
+                    fill='transparent'
+                    strokeWidth={stroke}
+                    strokeDasharray={`${circumference} ${circumference}`}
+                    strokeDashoffset={circumference * (1 - progress)}
+                    r={normalizedRadius}
+                    cx={radius}
+                    cy={radius}
+                  />
+                </svg>
+              )}
+
+              <button
+                onClick={togglePause}
+                className={`pause-button ${isPaused ? 'is-resume' : ''}`}
+                aria-label={isPaused ? 'Resume workout' : 'Pause workout'}
+              >
+                <span className='material-symbols-rounded' aria-hidden='true'>
+                  {isPaused ? 'play_arrow' : 'pause'}
+                </span>
+              </button>
+            </div>
 
             <button
               onClick={next}
               disabled={currentIndex === WORKOUT.length - 1}
-              style={{ marginLeft: 12 }}
+              style={{ marginLeft: 6 }}
             >
               Skip{' '}
               <span
@@ -452,7 +559,7 @@ export default function App() {
               abortWorkout();
             }}
             className='abort-button'
-            style={{ marginTop: 24 }}
+            style={{ marginTop: 15 }}
           >
             {confirmAbort ? 'Tap again to confirm' : 'End workout'}
           </button>
@@ -470,13 +577,72 @@ export default function App() {
       {/* ---------- FINISHED ---------- */}
       {phase === 'finished' && (
         <>
-          <h1>Plank Workout Timer</h1>
-          <h2>Workout complete 🎉</h2>
+          <h1>
+            Workout complete!
+            <br />{' '}
+            <span
+              className='material-symbols-rounded'
+              style={{ fontSize: '1.5em' }}
+            >
+              trophy
+            </span>
+          </h1>
           <button className='start-button' onClick={goToConfig}>
             Restart
           </button>
         </>
       )}
+
+      {showGuide && <ExerciseGuide onClose={() => setShowGuide(false)} />}
     </main>
+  );
+}
+
+type ExerciseGuideProps = {
+  onClose: () => void;
+};
+
+function ExerciseGuide({ onClose }: ExerciseGuideProps) {
+  return (
+    <div className='guide-backdrop' onClick={onClose}>
+      <div
+        className='guide-modal'
+        onClick={(e) => e.stopPropagation()}
+        role='dialog'
+        aria-modal='true'
+      >
+        <header className='guide-header'>
+          <h2>Exercise guide</h2>
+          <button
+            type='button'
+            className='text-button'
+            onClick={onClose}
+            aria-label='Close exercise guide'
+          >
+            <span className='material-symbols-rounded'>close</span>
+          </button>
+        </header>
+
+        <div className='guide-content'>
+          <p className='guide-intro'>
+            Each exercise focuses on form and control. Follow the cues below to
+            maintain a safe, effective position.
+          </p>
+          {WORKOUT.map((ex) => (
+            <section key={ex.name} className='guide-exercise'>
+              <div className='guide-image-wrapper'>
+                <img src={ex.image} alt={ex.name} />
+              </div>
+              <h3>{ex.name}</h3>
+              <ul>
+                {(ex.description ?? []).map((line, i) => (
+                  <li key={i}>{line}</li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
