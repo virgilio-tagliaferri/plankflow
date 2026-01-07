@@ -27,7 +27,7 @@ type Phase =
   | 'finished';
 
 export default function App() {
-  const TIME_SCALE = DEBUG ? 0.8 : 1;
+  const TIME_SCALE = DEBUG ? 1 : 1;
 
   // ---------- STATE ----------
   const [phase, setPhase] = useState<Phase>('idle');
