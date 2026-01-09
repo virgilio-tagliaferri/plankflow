@@ -133,6 +133,93 @@ h4 {
   }*/
 }
 
+.workout-menu-button {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: none;
+  border: none;
+  line-height: 1;
+  color: white;
+  padding: 0.5rem;
+}
+.workout-menu-overlay {
+  background: @bg-app;
+  position: absolute;
+  inset: 0;
+  z-index: 50;
+  padding-top: 60px;
+  animation: fadeUp 0.2s ease-in;
+  .text-button {
+    position: absolute;
+    top: 12px;
+    background: none;
+    border: none;
+    font-size: 20px;
+    color: white;
+    padding: 0.5rem;
+    &.close {
+      right: 12px;
+    }
+    &.back {
+      left: 12px;
+    }
+  }
+}
+.workout-menu-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: 100vw;
+  width: 100%;
+  margin: auto;
+  text-align: left;
+  color: white;
+  align-items: center;
+  .workout-menu-image-wrapper {
+    height: 140px;
+    width: 100%;
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    img {
+      width: 100%;
+      object-fit: cover;
+      object-position: 50% 40%;
+      transform: scale(1.1);
+    }
+  }
+  .workout-menu-item {
+    padding: 0 2rem;
+    margin: auto;
+    animation: fadeUp 0.2s ease-in;
+    h3 {
+      margin: 1em 0 0.5em 0;
+    }
+    ul {
+      padding-left: 10px;
+      list-style-type: '- ';
+      line-height: 1.3em;
+      margin: 0;
+    }
+  }
+}
+.workout-menu-list {
+  list-style-type: none;
+  text-align: right;
+  padding: 0;
+  margin: 0;
+  /*li + li {
+    border-top: 1px solid rgba(@text-primary, 0.1);
+  }*/
+  button {
+    background: none;
+    border: none;
+    font-size: 1.25rem;
+    padding: 1rem 2rem;
+  }
+}
+
 .controlPanel {
   display: flex;
   align-items: center;
@@ -405,9 +492,7 @@ button {
 }
 
 .guide-intro {
-  opacity: 0.75;
   margin: 0;
-  text-align: left;
 }
 
 .guide-content {
@@ -469,7 +554,6 @@ button {
   ul {
     padding-left: 10px;
     margin: 0;
-    opacity: 0.85;
     list-style-type: '- ';
     line-height: 1.3em;
   }

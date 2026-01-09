@@ -73,6 +73,7 @@ export const WORKOUT: Exercise[] = [
       'Lie on your side with your forearm on the floor',
       'Stack your feet and lift your hips, keeping your body in a straight line',
       'Engage your core to stay balanced and avoid collapsing into the shoulder',
+      'Switch side when prompted',
     ],
 
     image: '/exercises/side-plank.png',
@@ -94,10 +95,10 @@ export const WORKOUT: Exercise[] = [
     id: 8,
     name: 'Single Arm Plank',
     description: [
-      'Keep your body in a straight line from head to heels.',
       'Support your weight on one straight arm, shoulder stacked over wrist.',
-      'Keep the free arm close to your body and engage your core to prevent hip rotation.',
-      'Breathe steadily and avoid shifting side to side.',
+      'Keep your body in a straight line from head to heels.',
+      'Keep the free arm close to your body and avoid hip rotation.',
+      'Switch arm when prompted',
     ],
     image: '/exercises/single-arm-plank.png',
     canMirror: true,

@@ -93,6 +93,25 @@ export default function App() {
       ? Math.min(1, Math.max(0, 1 - timeLeft / totalTime))
       : 1;
 
+  const [isWorkoutMenuOpen, setIsWorkoutMenuOpen] = useState(false);
+
+  const [workoutMenuView, setWorkoutMenuView] = useState<'menu' | 'guide'>(
+    'menu'
+  );
+
+  // ------- Pause workout when menu opens ------- */
+  useEffect(() => {
+    if (isWorkoutMenuOpen) {
+      setIsPaused(true);
+    }
+  }, [isWorkoutMenuOpen]);
+  // ------- Open workout menu ------- */
+  useEffect(() => {
+    if (isWorkoutMenuOpen) {
+      setWorkoutMenuView('menu');
+    }
+  }, [isWorkoutMenuOpen]);
+
   useEffect(() => {
     setConfig(configFromLevel(level));
   }, [level]);
@@ -318,6 +337,76 @@ export default function App() {
           Debug mode (×{1 / TIME_SCALE})
         </div>
       )}
+      {/* ---------- MENU OVERLAY ---------- */}
+      {isWorkoutMenuOpen && (
+        <div className='workout-menu-overlay'>
+          {workoutMenuView === 'menu' && (
+            <ul className='workout-menu-list'>
+              <li>
+                <button
+                  type='button'
+                  onClick={() => setWorkoutMenuView('guide')}
+                >
+                  Exercise guide
+                </button>
+              </li>
+              <li>
+                <button type='button' disabled>
+                  Sound & vibration
+                </button>
+              </li>
+              <li>
+                <button type='button' disabled>
+                  Measurements
+                </button>
+              </li>
+              <li>
+                <button type='button' disabled>
+                  Support
+                </button>
+              </li>
+            </ul>
+          )}
+          <div className='workout-menu-content'>
+            <button
+              type='button'
+              className='text-button close'
+              onClick={() => setIsWorkoutMenuOpen(false)}
+              aria-label='Close menu'
+            >
+              <span className='material-symbols-rounded'>close</span>
+            </button>
+
+            {workoutMenuView === 'guide' && (
+              <>
+                <button
+                  type='button'
+                  className='text-button back'
+                  onClick={() => setWorkoutMenuView('menu')}
+                >
+                  <span className='material-symbols-rounded'>arrow_back</span>
+                </button>
+
+                <div className='workout-menu-item'>
+                  <div className='workout-menu-image-wrapper'>
+                    <img
+                      src={currentExercise.image}
+                      alt={currentExercise.name}
+                    />
+                  </div>
+                  <h3>{currentExercise.name}</h3>
+                  <ul>
+                    {(currentExercise.description ?? []).map((line, i) => (
+                      <li key={i}>{line}</li>
+                    ))}
+                  </ul>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* ---------- IDLE ---------- */}
       {phase === 'idle' && <IdleScreen onStart={goToConfig} />}
 
@@ -344,6 +433,7 @@ export default function App() {
           isEnding={isEnding}
           isPastHalfway={isPastHalfway}
           isPhaseTransition={isPhaseTransition}
+          setIsWorkoutMenuOpen={setIsWorkoutMenuOpen}
           radius={radius}
           stroke={stroke}
           circumference={circumference}
