@@ -27,7 +27,7 @@ type Phase =
   | 'finished';
 
 export default function App() {
-  const TIME_SCALE = DEBUG ? 1 : 1;
+  const TIME_SCALE = DEBUG ? 0.1 : 1;
 
   // ---------- STATE ----------
   const [phase, setPhase] = useState<Phase>('idle');
@@ -42,9 +42,12 @@ export default function App() {
   const [showGuide, setShowGuide] = useState(false);
   const { preferences } = usePreferences();
   const recorder = useSessionRecorder();
-  const [summary, setSummary] = useState<ReturnType<
-    typeof computeSessionSummary
-  > | null>(null);
+  type SessionSummaryWithCalories = ReturnType<typeof computeSessionSummary> & {
+    calories?: number;
+  };
+  const [summary, setSummary] = useState<SessionSummaryWithCalories | null>(
+    null
+  );
 
   // ---------- DERIVED ----------
   const currentExercise = WORKOUT[currentIndex];
@@ -87,14 +90,39 @@ export default function App() {
       ? Math.min(1, Math.max(0, 1 - timeLeft / totalTime))
       : 1;
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-
-  type SettingsView = 'menu' | 'guide' | 'sound' | 'appearance';
-
+  type SettingsView = 'menu' | 'guide' | 'sound' | 'appearance' | 'bodyMetrics';
   const [settingsMenuView, setSettingsMenuView] =
     useState<SettingsView>('menu');
-  const [theme, setTheme] = useState<'light' | 'dark'>('dark');
-  const [soundEnabled, setSoundEnabled] = useState(true);
-  const [vibrationEnabled, setVibrationEnabled] = useState(true);
+
+  // PREFERENCES + LOCAL STORAGE
+  const [theme, setTheme] = useState<'light' | 'dark'>(() =>
+    load('theme', 'dark')
+  );
+  const [fontStyle, setFontStyle] = useState<'default' | 'compact'>(() =>
+    load('fontStyle', 'default')
+  );
+  const [soundEnabled, setSoundEnabled] = useState<boolean>(() =>
+    load('soundEnabled', true)
+  );
+  const [vibrationEnabled, setVibrationEnabled] = useState<boolean>(() =>
+    load('vibrationEnabled', true)
+  );
+  const [unitSystem, setUnitSystem] = useState<'metric' | 'imperial'>(() =>
+    load('unitSystem', 'metric')
+  );
+  const [weightKg, setWeightKg] = useState<number | null>(() => {
+    const v = load<number | null>('weightKg', null);
+    return typeof v === 'number' && v > 0 ? v : null;
+  });
+  useEffect(() => save('theme', theme), [theme]);
+  useEffect(() => save('fontStyle', fontStyle), [fontStyle]);
+  useEffect(() => save('soundEnabled', soundEnabled), [soundEnabled]);
+  useEffect(
+    () => save('vibrationEnabled', vibrationEnabled),
+    [vibrationEnabled]
+  );
+  useEffect(() => save('unitSystem', unitSystem), [unitSystem]);
+  useEffect(() => save('weightKg', weightKg), [weightKg]);
 
   // ------- Pause workout when menu opens ------- */
   useEffect(() => {
@@ -137,12 +165,24 @@ export default function App() {
   }, [currentIndex, phase]);
 
   // ---------- HELPERS ----------
+  function load<T>(key: string, fallback: T): T {
+    try {
+      const raw = localStorage.getItem(key);
+      return raw != null ? (JSON.parse(raw) as T) : fallback;
+    } catch {
+      return fallback;
+    }
+  }
+  function save<T>(key: string, value: T) {
+    try {
+      localStorage.setItem(key, JSON.stringify(value));
+    } catch {}
+  }
+
   function getBreakDuration(index: number) {
     return index === 4 ? config.longBreak : config.shortBreak;
   }
-
   const [prevPhase, setPrevPhase] = useState<Phase | null>(null);
-
   useEffect(() => {
     if (prevPhase === null) {
       setPrevPhase(phase);
@@ -251,15 +291,14 @@ export default function App() {
     if (phase !== 'finished') return;
 
     const session = recorder.endSession();
-
     if (!session) {
       console.warn('No session recorded');
       return;
     }
 
-    const result = computeSessionSummary(session, preferences);
+    const result = computeSessionSummary(session, preferences, level);
     setSummary(result);
-  }, [phase]);
+  }, [phase, preferences, recorder]);
 
   // ---------- ACTIONS ----------
   function goToConfig() {
@@ -326,7 +365,7 @@ export default function App() {
   // ---------- RENDER ----------
   return (
     <main
-      className={`workout-container theme-${theme} ${
+      className={`workout-container theme-${theme} font-${fontStyle} ${
         phase === 'exercise'
           ? 'workout-active'
           : phase === 'break' || phase === 'countdown'
@@ -339,7 +378,6 @@ export default function App() {
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-
         textAlign: 'center',
       }}
     >
@@ -394,7 +432,10 @@ export default function App() {
                 </button>
               </li>
               <li>
-                <button type='button' disabled>
+                <button
+                  type='button'
+                  onClick={() => setSettingsMenuView('bodyMetrics')}
+                >
                   Body metrics
                 </button>
               </li>
@@ -531,8 +572,182 @@ export default function App() {
                       Light theme
                     </span>
                   </div>
+
+                  <div className='settings-toggle'>
+                    <span
+                      className={`theme-label ${
+                        fontStyle === 'default' ? 'active' : ''
+                      }`}
+                    >
+                      Default
+                    </span>
+
+                    <button
+                      type='button'
+                      className={`theme-toggle ${fontStyle}`}
+                      onClick={() =>
+                        setFontStyle(
+                          fontStyle === 'default' ? 'compact' : 'default'
+                        )
+                      }
+                      aria-label='Toggle font style'
+                    >
+                      <span className='theme-toggle-thumb'>
+                        <span
+                          className={`font-option ${
+                            fontStyle === 'compact' ? 'compact' : 'default'
+                          }`}
+                        >
+                          Aa
+                        </span>
+                      </span>
+                    </button>
+
+                    <span
+                      className={`theme-label ${
+                        fontStyle === 'compact' ? 'active' : ''
+                      }`}
+                    >
+                      Compact
+                    </span>
+                  </div>
+
+                  {/* 
+                  <h3>Font style</h3>
+                  <ul
+                    className='settings-segmented'
+                    role='radiogroup'
+                    aria-label='Font style'
+                  >
+                    <li>
+                      <label className='font-option default'>
+                        <input
+                          type='radio'
+                          name='font-style'
+                          value='default'
+                          checked={fontStyle === 'default'}
+                          onChange={() => setFontStyle('default')}
+                        />
+                        <span className='radio-ui' />
+                        <span className='label'>Default</span>
+                        <span className='hint'>Josefin Sans</span>
+                      </label>
+                    </li>
+
+                    <li>
+                      <label className='font-option compact'>
+                        <input
+                          type='radio'
+                          name='font-style'
+                          value='compact'
+                          checked={fontStyle === 'compact'}
+                          onChange={() => setFontStyle('compact')}
+                        />
+                        <span className='radio-ui' />
+                        <span className='label'>Compact</span>
+                        <span className='hint'>Roboto Condensed</span>
+                      </label>
+                    </li>
+
+                    <li>
+                      <label className='font-option expressive'>
+                        <input
+                          type='radio'
+                          name='font-style'
+                          value='expressive'
+                          checked={fontStyle === 'expressive'}
+                          onChange={() => setFontStyle('expressive')}
+                        />
+                        <span className='radio-ui' />
+                        <span className='label'>Expressive</span>
+                        <span className='hint'>Roboto Slab</span>
+                      </label>
+                    </li>
+                  </ul>
+                  */}
                 </div>
               </>
+            )}
+
+            {settingsMenuView === 'bodyMetrics' && (
+              <div className='settings-menu-item'>
+                <button
+                  type='button'
+                  className='text-button back'
+                  onClick={() => setSettingsMenuView('menu')}
+                >
+                  <span className='material-symbols-rounded'>arrow_back</span>
+                </button>
+
+                <h3>Body metrics</h3>
+
+                {/* Unit switch */}
+                <div className='settings-toggle'>
+                  <span
+                    className={`theme-label ${
+                      unitSystem === 'metric' ? 'active' : ''
+                    }`}
+                  >
+                    Metric
+                  </span>
+
+                  <button
+                    type='button'
+                    className={`theme-toggle ${unitSystem}`}
+                    onClick={() =>
+                      setUnitSystem(
+                        unitSystem === 'metric' ? 'imperial' : 'metric'
+                      )
+                    }
+                    aria-label='Toggle unit system'
+                  >
+                    <span className='theme-toggle-thumb'>
+                      <span className='units-label'>
+                        {unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                      </span>
+                    </span>
+                  </button>
+
+                  <span
+                    className={`theme-label ${
+                      unitSystem === 'imperial' ? 'active' : ''
+                    }`}
+                  >
+                    Imperial
+                  </span>
+                </div>
+
+                {/* Weight input */}
+                <div className='settings-field'>
+                  <label>Weight</label>
+
+                  <div className='settings-input'>
+                    <input
+                      type='number'
+                      value={
+                        weightKg == null
+                          ? ''
+                          : unitSystem === 'metric'
+                          ? weightKg
+                          : Math.round(weightKg * 2.20462)
+                      }
+                      onChange={(e) => {
+                        const v = Number(e.target.value);
+                        if (Number.isNaN(v)) return;
+
+                        setWeightKg(
+                          unitSystem === 'metric' ? v : Math.round(v / 2.20462)
+                        );
+                      }}
+                    />
+                    {/* 
+                    <span className='unit-label'>
+                      {unitSystem === 'metric' ? 'kg' : 'lb'}
+                    </span>
+                    */}
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         </div>

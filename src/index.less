@@ -1,8 +1,19 @@
 :root {
   color-scheme: dark;
+  --font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
+    Roboto, sans-serif;
 }
-* {
-  box-sizing: border-box;
+.font-default {
+  --font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
+    Roboto, sans-serif;
+}
+.font-compact {
+  --font-family: 'Roboto Condensed', system-ui, sans-serif, -apple-system,
+    BlinkMacSystemFont, Roboto, sans-serif;
+}
+.font-expressive {
+  --font-family: 'Roboto Slab', serif, -apple-system, BlinkMacSystemFont, Roboto,
+    sans-serif;
 }
 .theme-dark {
   --bg-color: #002637;
@@ -10,6 +21,7 @@
   --accent-warning: #dd4;
   --danger-bg: #7f1d1d;
   --danger-text: #fca5a5;
+  --danger-text-alt: #fcc;
 
   --btn-bg: #00495a; // slate-800
   --btn-border: #226a7b; // slate-700
@@ -24,11 +36,12 @@
   --primary-gradient-end: rgba(84, 196, 20, 1);
 }
 .theme-light {
-  --bg-color: #ddeeee;
+  --bg-color: #fff;
   --text-primary: #334455;
-  --accent-warning: #cb0;
-  --danger-bg: #711;
-  --danger-text: #faa;
+  --accent-warning: #fa0;
+  --danger-bg: #930;
+  --danger-text: #d00;
+  --danger-text-alt: #fdd;
 
   --btn-bg: #267; // slate-800
   --btn-border: #045; // slate-700
@@ -44,12 +57,14 @@
 }
 body {
   margin: 0;
-  font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
-    Roboto, sans-serif;
+}
+* {
+  box-sizing: border-box;
 }
 main {
   background-color: var(--bg-color);
   color: var(--text-primary);
+  font-family: var(--font-family);
 }
 p {
   line-height: 1.3em;
@@ -190,7 +205,9 @@ h4 {
     margin: auto;
     animation: fadeUp 0.2s ease-in;
     width: 100%;
-    //h3 {margin: 1em 0 0.5em 0;}
+    h3:not(:first-child) {
+      margin-top: 2em;
+    }
     ul {
       padding-left: 10px;
       list-style-type: '- ';
@@ -206,15 +223,61 @@ h4 {
   margin: 0;
 }
 
+.settings-menu-content .settings-menu-item ul.settings-segmented {
+  list-style-type: none;
+  padding: 0;
+  li {
+    line-height: 1em;
+  }
+  li + li {
+    margin-top: 8px;
+  }
+  .font-option {
+    &.default {
+      font-family: 'Josefine Sans', system-ui, sans-serif, -apple-system,
+        BlinkMacSystemFont, Roboto, sans-serif;
+    }
+    &.compact {
+      font-family: 'Roboto Condensed', system-ui, sans-serif, -apple-system,
+        BlinkMacSystemFont, Roboto, sans-serif;
+    }
+    &.expressive {
+      font-family: 'Roboto Slab', system-ui, sans-serif, -apple-system,
+        BlinkMacSystemFont, Roboto, sans-serif;
+    }
+  }
+  .hint {
+    opacity: 0.7;
+  }
+  .label {
+    margin: 0 0.5em;
+    font-weight: 500;
+  }
+}
+
 .controlPanel {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
+input[type='number'] {
+  width: 80px;
+  background-color: #ffffff;
+  color: #002637;
+  padding: 0.75em;
+  border-radius: 8px;
+  border: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: inset 0px 0px 5px rgba(0, 0, 0, 0.2);
+  font-family: inherit;
+  font-size: 1rem;
+  &:focus {
+    outline: 2px solid var(--accent-warning);
+  }
+}
+
 button:not([type='checkbox']):not([type='radio']) {
-  font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
-    Roboto, sans-serif;
+  font-family: var(--font-family);
   background-color: var(--btn-bg);
   color: white;
   border: 1px solid var(--btn-border);
@@ -290,7 +353,7 @@ button:not([type='checkbox']):not([type='radio']) {
     z-index: 20; // sits above cancellation backdrop
     &:hover {
       background-color: var(--danger-bg);
-      color: var(--danger-text)-alt;
+      color: var(--danger-text-alt);
     }
     &:focus,
     &:focus:not(:disabled) {
@@ -375,9 +438,13 @@ button:not([type='checkbox']):not([type='radio']) {
         font-size: 18px;
       }
     }
+    &.default .theme-toggle-thumb,
+    &.metric .theme-toggle-thumb,
     &.dark .theme-toggle-thumb {
       transform: translateX(0);
     }
+    &.compact .theme-toggle-thumb,
+    &.imperial .theme-toggle-thumb,
     &.light .theme-toggle-thumb {
       transform: translateX(28px);
     }
@@ -398,6 +465,18 @@ button:not([type='checkbox']):not([type='radio']) {
   justify-content: space-between;
   margin: 16px 0;
   gap: 12px;
+}
+.settings-field {
+  display: flex;
+  flex-direction: row;
+  gap: 1em;
+  align-items: center;
+}
+.font-option,
+.units-label {
+  //font-family: Roboto, Arial, Helvetica, sans-serif;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 .pause-ring {
@@ -425,7 +504,7 @@ button:not([type='checkbox']):not([type='radio']) {
     transition: none;
   }
   &.is-rest circle {
-    stroke: white;
+    stroke: var(--text-primary);
   }
   &.is-paused circle {
     stroke: var(--accent-warning);
