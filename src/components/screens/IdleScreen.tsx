@@ -5,8 +5,8 @@ type Props = {
 export function IdleScreen({ onStart }: Props) {
   return (
     <>
-      <h1 style={{ marginTop: 0, marginBottom: 0 }}>
-        <span className='material-symbols-rounded logo'>hourglass</span>
+      <h1 className='logo' style={{ marginTop: 0, marginBottom: 0 }}>
+        <span className='material-symbols-rounded'>hourglass</span>
         <br />
         PlankFlow
       </h1>

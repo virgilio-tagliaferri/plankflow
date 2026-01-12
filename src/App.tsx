@@ -15,6 +15,7 @@ import {
 import { IdleScreen } from './components/screens/IdleScreen';
 import { ConfigScreen } from './components/screens/ConfigScreen';
 import { WorkoutScreen } from './components/screens/WorkoutScreen';
+import { SettingsMenu } from './components/SettingsMenu';
 
 const DEBUG = import.meta.env.DEV;
 
@@ -90,9 +91,6 @@ export default function App() {
       ? Math.min(1, Math.max(0, 1 - timeLeft / totalTime))
       : 1;
   const [isSettingsMenuOpen, setIsSettingsMenuOpen] = useState(false);
-  type SettingsView = 'menu' | 'guide' | 'sound' | 'appearance' | 'bodyMetrics';
-  const [settingsMenuView, setSettingsMenuView] =
-    useState<SettingsView>('menu');
 
   // PREFERENCES + LOCAL STORAGE
   const [theme, setTheme] = useState<'light' | 'dark'>(() =>
@@ -141,13 +139,6 @@ export default function App() {
       vibrate(30);
     }
   }, [vibrationEnabled]);
-
-  // ------- Open workout menu ------- */
-  useEffect(() => {
-    if (isSettingsMenuOpen) {
-      setSettingsMenuView('menu');
-    }
-  }, [isSettingsMenuOpen]);
 
   useEffect(() => {
     setConfig(configFromLevel(level));
@@ -400,358 +391,24 @@ export default function App() {
         </div>
       )}
       {/* ---------- MENU OVERLAY ---------- */}
-      {isSettingsMenuOpen && (
-        <div className='settings-menu-overlay'>
-          {settingsMenuView === 'menu' && (
-            <ul className='settings-menu-list'>
-              {/* NO GUIDE ON CONFIG PHASE - Redundant because of Guide button */}
-              {phase !== 'config' && (
-                <li>
-                  <button
-                    type='button'
-                    onClick={() => setSettingsMenuView('guide')}
-                  >
-                    Exercise guide
-                  </button>
-                </li>
-              )}
-              <li>
-                <button
-                  type='button'
-                  onClick={() => setSettingsMenuView('sound')}
-                >
-                  Sound & vibration
-                </button>
-              </li>
-              <li>
-                <button
-                  type='button'
-                  onClick={() => setSettingsMenuView('appearance')}
-                >
-                  Appearance
-                </button>
-              </li>
-              <li>
-                <button
-                  type='button'
-                  onClick={() => setSettingsMenuView('bodyMetrics')}
-                >
-                  Body metrics
-                </button>
-              </li>
-              <li>
-                <button type='button' disabled>
-                  Support
-                </button>
-              </li>
-              <li>
-                <button type='button' disabled>
-                  Share this app
-                </button>
-              </li>
-            </ul>
-          )}
-          <div className='settings-menu-content'>
-            <button
-              type='button'
-              className='text-button close'
-              onClick={() => setIsSettingsMenuOpen(false)}
-              aria-label='Close menu'
-            >
-              <span className='material-symbols-rounded'>close</span>
-            </button>
-
-            {settingsMenuView === 'guide' && (
-              <>
-                <button
-                  type='button'
-                  className='text-button back'
-                  onClick={() => setSettingsMenuView('menu')}
-                >
-                  <span className='material-symbols-rounded'>arrow_back</span>
-                </button>
-
-                <div className='settings-menu-item'>
-                  <div className='settings-menu-image-wrapper'>
-                    <img
-                      src={currentExercise.image}
-                      alt={currentExercise.name}
-                    />
-                  </div>
-                  <h3>{currentExercise.name}</h3>
-                  <ul>
-                    {(currentExercise.description ?? []).map((line, i) => (
-                      <li key={i}>{line}</li>
-                    ))}
-                  </ul>
-                </div>
-              </>
-            )}
-
-            {settingsMenuView === 'sound' && (
-              <>
-                <button
-                  type='button'
-                  className='text-button back'
-                  onClick={() => setSettingsMenuView('menu')}
-                >
-                  <span className='material-symbols-rounded'>arrow_back</span>
-                </button>
-                <div className='settings-menu-item'>
-                  <h3>Sound & vibration</h3>
-
-                  <div className='settings-toggle'>
-                    <label>Enable sound cues</label>
-                    <button
-                      type='button'
-                      className={`toggle ${soundEnabled ? 'on' : ''}`}
-                      onClick={() => setSoundEnabled((v) => !v)}
-                      aria-pressed={soundEnabled}
-                    >
-                      <span className='toggle-thumb' />
-                    </button>
-                  </div>
-
-                  <div className='settings-toggle'>
-                    <label>Enable vibration cues</label>
-                    <button
-                      type='button'
-                      className={`toggle ${vibrationEnabled ? 'on' : ''}`}
-                      onClick={() => setVibrationEnabled((v) => !v)}
-                      aria-pressed={vibrationEnabled}
-                    >
-                      <span className='toggle-thumb' />
-                    </button>
-                  </div>
-                </div>
-              </>
-            )}
-
-            {settingsMenuView === 'appearance' && (
-              <>
-                <button
-                  type='button'
-                  className='text-button back'
-                  onClick={() => setSettingsMenuView('menu')}
-                >
-                  <span className='material-symbols-rounded'>arrow_back</span>
-                </button>
-
-                <div className='settings-menu-item'>
-                  <h3>Appearance</h3>
-
-                  <div className='settings-toggle'>
-                    <span
-                      className={`theme-label ${
-                        theme === 'dark' ? 'active' : ''
-                      }`}
-                    >
-                      Dark theme
-                    </span>
-
-                    <button
-                      type='button'
-                      className={`theme-toggle ${theme}`}
-                      onClick={() =>
-                        setTheme(theme === 'dark' ? 'light' : 'dark')
-                      }
-                      aria-label='Toggle theme'
-                    >
-                      <span className='theme-toggle-thumb'>
-                        <span className='material-symbols-rounded'>
-                          {theme === 'dark' ? 'dark_mode' : 'light_mode'}
-                        </span>
-                      </span>
-                    </button>
-
-                    <span
-                      className={`theme-label ${
-                        theme === 'light' ? 'active' : ''
-                      }`}
-                    >
-                      Light theme
-                    </span>
-                  </div>
-
-                  <div className='settings-toggle'>
-                    <span
-                      className={`theme-label ${
-                        fontStyle === 'default' ? 'active' : ''
-                      }`}
-                    >
-                      Default
-                    </span>
-
-                    <button
-                      type='button'
-                      className={`theme-toggle ${fontStyle}`}
-                      onClick={() =>
-                        setFontStyle(
-                          fontStyle === 'default' ? 'compact' : 'default'
-                        )
-                      }
-                      aria-label='Toggle font style'
-                    >
-                      <span className='theme-toggle-thumb'>
-                        <span
-                          className={`font-option ${
-                            fontStyle === 'compact' ? 'compact' : 'default'
-                          }`}
-                        >
-                          Aa
-                        </span>
-                      </span>
-                    </button>
-
-                    <span
-                      className={`theme-label ${
-                        fontStyle === 'compact' ? 'active' : ''
-                      }`}
-                    >
-                      Compact
-                    </span>
-                  </div>
-
-                  {/* 
-                  <h3>Font style</h3>
-                  <ul
-                    className='settings-segmented'
-                    role='radiogroup'
-                    aria-label='Font style'
-                  >
-                    <li>
-                      <label className='font-option default'>
-                        <input
-                          type='radio'
-                          name='font-style'
-                          value='default'
-                          checked={fontStyle === 'default'}
-                          onChange={() => setFontStyle('default')}
-                        />
-                        <span className='radio-ui' />
-                        <span className='label'>Default</span>
-                        <span className='hint'>Josefin Sans</span>
-                      </label>
-                    </li>
-
-                    <li>
-                      <label className='font-option compact'>
-                        <input
-                          type='radio'
-                          name='font-style'
-                          value='compact'
-                          checked={fontStyle === 'compact'}
-                          onChange={() => setFontStyle('compact')}
-                        />
-                        <span className='radio-ui' />
-                        <span className='label'>Compact</span>
-                        <span className='hint'>Roboto Condensed</span>
-                      </label>
-                    </li>
-
-                    <li>
-                      <label className='font-option expressive'>
-                        <input
-                          type='radio'
-                          name='font-style'
-                          value='expressive'
-                          checked={fontStyle === 'expressive'}
-                          onChange={() => setFontStyle('expressive')}
-                        />
-                        <span className='radio-ui' />
-                        <span className='label'>Expressive</span>
-                        <span className='hint'>Roboto Slab</span>
-                      </label>
-                    </li>
-                  </ul>
-                  */}
-                </div>
-              </>
-            )}
-
-            {settingsMenuView === 'bodyMetrics' && (
-              <div className='settings-menu-item'>
-                <button
-                  type='button'
-                  className='text-button back'
-                  onClick={() => setSettingsMenuView('menu')}
-                >
-                  <span className='material-symbols-rounded'>arrow_back</span>
-                </button>
-
-                <h3>Body metrics</h3>
-
-                {/* Unit switch */}
-                <div className='settings-toggle'>
-                  <span
-                    className={`theme-label ${
-                      unitSystem === 'metric' ? 'active' : ''
-                    }`}
-                  >
-                    Metric
-                  </span>
-
-                  <button
-                    type='button'
-                    className={`theme-toggle ${unitSystem}`}
-                    onClick={() =>
-                      setUnitSystem(
-                        unitSystem === 'metric' ? 'imperial' : 'metric'
-                      )
-                    }
-                    aria-label='Toggle unit system'
-                  >
-                    <span className='theme-toggle-thumb'>
-                      <span className='units-label'>
-                        {unitSystem === 'imperial' ? 'lbs' : 'kg'}
-                      </span>
-                    </span>
-                  </button>
-
-                  <span
-                    className={`theme-label ${
-                      unitSystem === 'imperial' ? 'active' : ''
-                    }`}
-                  >
-                    Imperial
-                  </span>
-                </div>
-
-                {/* Weight input */}
-                <div className='settings-field'>
-                  <label>Weight</label>
-
-                  <div className='settings-input'>
-                    <input
-                      type='number'
-                      value={
-                        weightKg == null
-                          ? ''
-                          : unitSystem === 'metric'
-                          ? weightKg
-                          : Math.round(weightKg * 2.20462)
-                      }
-                      onChange={(e) => {
-                        const v = Number(e.target.value);
-                        if (Number.isNaN(v)) return;
-
-                        setWeightKg(
-                          unitSystem === 'metric' ? v : Math.round(v / 2.20462)
-                        );
-                      }}
-                    />
-                    {/* 
-                    <span className='unit-label'>
-                      {unitSystem === 'metric' ? 'kg' : 'lb'}
-                    </span>
-                    */}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <SettingsMenu
+        isOpen={isSettingsMenuOpen}
+        onClose={() => setIsSettingsMenuOpen(false)}
+        phase={phase}
+        currentExercise={currentExercise}
+        theme={theme}
+        setTheme={setTheme}
+        fontStyle={fontStyle}
+        setFontStyle={setFontStyle}
+        soundEnabled={soundEnabled}
+        setSoundEnabled={setSoundEnabled}
+        vibrationEnabled={vibrationEnabled}
+        setVibrationEnabled={setVibrationEnabled}
+        unitSystem={unitSystem}
+        setUnitSystem={setUnitSystem}
+        weightKg={weightKg}
+        setWeightKg={setWeightKg}
+      />
 
       {/* ---------- IDLE ---------- */}
       {phase === 'idle' && <IdleScreen onStart={goToConfig} />}

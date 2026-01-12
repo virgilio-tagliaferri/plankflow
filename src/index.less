@@ -1,16 +1,17 @@
 :root {
   color-scheme: dark;
-  --font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
-    Roboto, sans-serif;
+  --font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, Roboto,
+    sans-serif;
 }
 .font-default {
-  --font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
-    Roboto, sans-serif;
+  --font-family: 'Roboto', system-ui, -apple-system, BlinkMacSystemFont, Roboto,
+    sans-serif;
 }
 .font-compact {
   --font-family: 'Roboto Condensed', system-ui, sans-serif, -apple-system,
     BlinkMacSystemFont, Roboto, sans-serif;
 }
+/* FONT REMOVED */
 .font-expressive {
   --font-family: 'Roboto Slab', serif, -apple-system, BlinkMacSystemFont, Roboto,
     sans-serif;
@@ -71,19 +72,24 @@ p {
 }
 
 .logo {
-  margin: 0 0 0.25em;
-  font-size: 1.75em;
-  background-color: var(--primary-green);
-  background: linear-gradient(
-    45deg,
-    var(--btn-hover) 30%,
-    var(--primary-gradient-end) 100%
-  );
-  border-radius: 50%;
-  padding: 1rem;
-  color: white;
-  /*-webkit-background-clip: text;
+  font-family: 'Josefin Sans', system-ui, -apple-system, BlinkMacSystemFont,
+    Roboto, sans-serif;
+  font-weight: bold;
+  span {
+    margin: 0 0 0.25em;
+    font-size: 1.75em;
+    background-color: var(--primary-green);
+    background: linear-gradient(
+      45deg,
+      var(--btn-hover) 30%,
+      var(--primary-gradient-end) 100%
+    );
+    border-radius: 50%;
+    padding: 1rem;
+    color: white;
+    /*-webkit-background-clip: text;
   -webkit-text-fill-color: transparent;*/
+  }
 }
 
 .workout-container {
@@ -234,7 +240,7 @@ h4 {
   }
   .font-option {
     &.default {
-      font-family: 'Josefine Sans', system-ui, sans-serif, -apple-system,
+      font-family: 'Roboto', system-ui, sans-serif, -apple-system,
         BlinkMacSystemFont, Roboto, sans-serif;
     }
     &.compact {
@@ -463,8 +469,14 @@ button:not([type='checkbox']):not([type='radio']) {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 16px 0;
+  margin: 8px 0;
   gap: 12px;
+  .theme-label {
+    flex-basis: 120px;
+    &:nth-of-type(2) {
+      text-align: right;
+    }
+  }
 }
 .settings-field {
   display: flex;
@@ -476,7 +488,7 @@ button:not([type='checkbox']):not([type='radio']) {
 .units-label {
   //font-family: Roboto, Arial, Helvetica, sans-serif;
   font-size: 0.8rem;
-  font-weight: bold;
+  font-weight: 400;
 }
 
 .pause-ring {
