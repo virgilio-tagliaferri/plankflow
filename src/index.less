@@ -66,6 +66,9 @@ main {
   background-color: var(--bg-color);
   color: var(--text-primary);
   font-family: var(--font-family);
+  max-width: 640px;
+  margin: auto;
+  box-shadow: 0 0 300px 300px var(--bg-color);
 }
 p {
   line-height: 1.3em;
@@ -156,9 +159,6 @@ h4 {
     opacity: 1;
     transform: translateY(0);
   }
-  /*.workout-active & h2 {
-    animation: blink 1s ease-in-out infinite;
-  }*/
 }
 
 .settings-menu-overlay {
@@ -181,6 +181,7 @@ h4 {
     }
     &.back {
       left: 12px;
+      animation: fadeLeft 0.2s ease-in;
     }
   }
 }
@@ -465,6 +466,73 @@ button:not([type='checkbox']):not([type='radio']) {
   }
 }
 
+/*********** Baseline, reset styles ***********/
+input[type='range'] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+  //width: 25rem; // LET AUTO = WIDTH
+}
+/* Removes default focus */
+input[type='range']:focus {
+  outline: none;
+}
+/******** Chrome, Safari, Opera and Edge Chromium styles ********/
+/* slider track */
+input[type='range']::-webkit-slider-runnable-track {
+  background-color: var(--btn-bg);
+  border-radius: 1rem;
+  height: 1rem;
+  outline: 1px solid var(--btn-border);
+}
+/* slider thumb */
+input[type='range']::-webkit-slider-thumb {
+  -webkit-appearance: none; /* Override default look */
+  appearance: none;
+  margin-top: -4px; /* Centers thumb on the track */
+  background-color: var(--primary-green);
+  background: linear-gradient(
+    45deg,
+    var(--primary-gradient-start) 0%,
+    var(--primary-gradient-mid) 50%,
+    var(--primary-gradient-end) 100%
+  );
+  //outline: 1px solid var(--primary-green-border);
+  border-radius: 1.5rem;
+  height: 1.5rem;
+  width: 1.5rem;
+  z-index: 1;
+  position: relative;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.4);
+}
+input[type='range']:focus::-webkit-slider-thumb {
+  outline: 3px solid var(--primary-green-border);
+  outline-offset: 0.125rem;
+}
+/*********** Firefox styles ***********/
+/* slider track */
+input[type='range']::-moz-range-track {
+  background-color: var(--btn-bg);
+  outline: 1px solid var(--btn-border);
+  border-radius: 1rem;
+  height: 1rem;
+}
+
+/* slider thumb */
+input[type='range']::-moz-range-thumb {
+  background-color: var(--primary-green);
+  //outline: 1px solid var(--primary-green-border);
+  border: none; /*Removes extra border that FF applies*/
+  border-radius: 1.5rem;
+  height: 1.5rem;
+  width: 1.5rem;
+}
+input[type='range']:focus::-moz-range-thumb {
+  outline: 3px solid var(--primary-green-border);
+  outline-offset: 0.125rem;
+}
+
 .settings-toggle {
   display: flex;
   align-items: center;
@@ -628,7 +696,6 @@ button:not([type='checkbox']):not([type='radio']) {
   display: flex;
   flex-direction: column;
 }
-
 .guide-header {
   position: sticky;
   top: 0;
@@ -646,11 +713,9 @@ button:not([type='checkbox']):not([type='radio']) {
     margin: 2rem 0 0;
   }
 }
-
 .guide-intro {
   margin: 0;
 }
-
 .guide-content {
   display: flex;
   flex-direction: column;
@@ -679,7 +744,6 @@ button:not([type='checkbox']):not([type='radio']) {
     bottom: 0;
   }
 }
-
 .guide-exercise {
   &:last-of-type {
     margin-bottom: 2rem;
@@ -714,6 +778,23 @@ button:not([type='checkbox']):not([type='radio']) {
     line-height: 1.3em;
   }
 }
+
+@media (min-width: 640px) {
+  .guide-modal {
+    max-width: 640px;
+  }
+  .guide-content {
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: row;
+    gap: 30px 6%;
+  }
+
+  .guide-exercise {
+    width: 47%;
+  }
+}
+
 /*@keyframes pulse-active {
   0% {
     filter: brightness(100%);
@@ -769,6 +850,17 @@ button:not([type='checkbox']):not([type='radio']) {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fadeLeft {
+  from {
+    opacity: 0;
+    transform: translateX(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
   }
 }
 @keyframes flashingCue {

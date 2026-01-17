@@ -270,7 +270,7 @@ export function SettingsMenu({
             )}
 
             {settingsMenuView === 'bodyMetrics' && (
-              <div className='settings-menu-item'>
+              <>
                 <button
                   type='button'
                   className='text-button back'
@@ -278,76 +278,79 @@ export function SettingsMenu({
                 >
                   <span className='material-symbols-rounded'>arrow_back</span>
                 </button>
+                <div className='settings-menu-item'>
+                  <h3>Body metrics</h3>
 
-                <h3>Body metrics</h3>
-
-                {/* Unit switch */}
-                <div className='settings-toggle'>
-                  <span
-                    className={`theme-label ${
-                      unitSystem === 'metric' ? 'active' : ''
-                    }`}
-                  >
-                    Metric
-                  </span>
-
-                  <button
-                    type='button'
-                    className={`theme-toggle ${unitSystem}`}
-                    onClick={() =>
-                      setUnitSystem(
-                        unitSystem === 'metric' ? 'imperial' : 'metric'
-                      )
-                    }
-                    aria-label='Toggle unit system'
-                  >
-                    <span className='theme-toggle-thumb'>
-                      <span className='units-label'>
-                        {unitSystem === 'imperial' ? 'lbs' : 'kg'}
-                      </span>
+                  {/* Unit switch */}
+                  <div className='settings-toggle'>
+                    <span
+                      className={`theme-label ${
+                        unitSystem === 'metric' ? 'active' : ''
+                      }`}
+                    >
+                      Metric
                     </span>
-                  </button>
 
-                  <span
-                    className={`theme-label ${
-                      unitSystem === 'imperial' ? 'active' : ''
-                    }`}
-                  >
-                    Imperial
-                  </span>
-                </div>
-
-                {/* Weight input */}
-                <div className='settings-field'>
-                  <label>Weight</label>
-
-                  <div className='settings-input'>
-                    <input
-                      type='number'
-                      value={
-                        weightKg == null
-                          ? ''
-                          : unitSystem === 'metric'
-                          ? weightKg
-                          : Math.round(weightKg * 2.20462)
+                    <button
+                      type='button'
+                      className={`theme-toggle ${unitSystem}`}
+                      onClick={() =>
+                        setUnitSystem(
+                          unitSystem === 'metric' ? 'imperial' : 'metric'
+                        )
                       }
-                      onChange={(e) => {
-                        const v = Number(e.target.value);
-                        if (Number.isNaN(v)) return;
+                      aria-label='Toggle unit system'
+                    >
+                      <span className='theme-toggle-thumb'>
+                        <span className='units-label'>
+                          {unitSystem === 'imperial' ? 'lbs' : 'kg'}
+                        </span>
+                      </span>
+                    </button>
 
-                        setWeightKg(
-                          unitSystem === 'metric' ? v : Math.round(v / 2.20462)
-                        );
-                      }}
-                    />
-                    {/* 
+                    <span
+                      className={`theme-label ${
+                        unitSystem === 'imperial' ? 'active' : ''
+                      }`}
+                    >
+                      Imperial
+                    </span>
+                  </div>
+
+                  {/* Weight input */}
+                  <div className='settings-field'>
+                    <label>Weight</label>
+
+                    <div className='settings-input'>
+                      <input
+                        type='number'
+                        value={
+                          weightKg == null
+                            ? ''
+                            : unitSystem === 'metric'
+                            ? weightKg
+                            : Math.round(weightKg * 2.20462)
+                        }
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          if (Number.isNaN(v)) return;
+
+                          setWeightKg(
+                            unitSystem === 'metric'
+                              ? v
+                              : Math.round(v / 2.20462)
+                          );
+                        }}
+                      />
+                      {/* 
                     <span className='unit-label'>
                       {unitSystem === 'metric' ? 'kg' : 'lb'}
                     </span>
                     */}
+                    </div>
                   </div>
                 </div>
-              </div>
+              </>
             )}
           </div>
         </div>

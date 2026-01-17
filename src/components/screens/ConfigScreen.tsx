@@ -40,7 +40,7 @@ export function ConfigScreen({
       </p>
 
       <div style={{ marginBottom: 32, marginTop: 32 }}>
-        <label style={{ display: 'block', marginBottom: 8 }}>
+        <label style={{ display: 'block', marginBottom: '1rem' }}>
           Difficulty: <strong>{LEVEL_LABELS[level]}</strong>
         </label>
 
@@ -54,13 +54,13 @@ export function ConfigScreen({
           onChange={(e) => onLevelChange(Number(e.target.value) as Level)}
         />
 
-        <p style={{ margin: '0.5rem' }}>
+        <p style={{ margin: '1rem 0 0.5rem 0' }}>
           Plank hold: <strong>{config.exerciseDuration}s</strong>
         </p>
-        <p style={{ margin: '0.5rem' }}>
+        <p style={{ margin: '0.5rem 0' }}>
           Short rest: <strong>{config.shortBreak}s</strong>
         </p>
-        <p style={{ margin: '0.5rem' }}>
+        <p style={{ margin: '0.5rem 0' }}>
           Long rest: <strong>{config.longBreak}s</strong>
         </p>
       </div>
